@@ -6,11 +6,11 @@
 
 三、 说明：
 
-    1. tesorflow serving目前仅支持由tensorflow训练，由tf.saved_model保存的格式为pb的模型
+ 1. tesorflow serving目前仅支持由tensorflow训练，由tf.saved_model保存的格式为pb的模型
     
-    3. tensorflow和keras保存模型的机制不同，前者采用protobuf协议序列化模型结构与参数，后者采用HDF5技术保存模型
+ 2. tensorflow和keras保存模型的机制不同，前者采用protobuf协议序列化模型结构与参数，后者采用HDF5技术保存模型
     
-    2. tensorflow 2.0将推出直接转换由keras训练好的模型， 不需要再使用野生的方法进行转换
+ 3. tensorflow 2.0将推出直接转换由keras训练好的模型， 不需要再使用野生的方法进行转换
 
 
 #### tensorflow serving部署多模型教程
