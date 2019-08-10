@@ -6,18 +6,20 @@
 
 三、 说明：
 
- 1. tesorflow serving目前仅支持由tensorflow训练，由tf.saved_model保存的格式为pb的模型
+ 1. tensorflow serving 优势：版本维护, 模型热更新
+
+ 2. tesorflow serving目前仅支持由tensorflow训练，由tf.saved_model保存的格式为pb的模型
     
- 2. tensorflow和keras保存模型的机制不同，前者采用protobuf协议序列化模型结构与参数，后者采用HDF5技术保存模型
+ 3. tensorflow和keras保存模型的机制不同，前者采用protobuf协议序列化模型结构与参数，后者采用HDF5技术保存模型
     
- 3. tensorflow 2.0将推出直接转换由keras训练好的模型， 不需要再使用野生的方法进行转换
+ 4. tensorflow 2.0将推出直接转换由keras训练好的模型， 不需要再使用野生的方法进行转换
 
 
 #### tensorflow serving部署多模型教程
 
 一、 部署说明
 
- 1. tensorFlow serving部署多模型方式有两种：docker和ubuntu deb包安装, 且redhat机器暂时不支持第二种部署方式
+ 1. tensorFlow serving部署多模型方式有两种：docker和ubuntu deb包安装, 且redhat系统暂时不支持第二种部署方式
  
  2. 关于docker, 可以阅读以下两篇博客, 如果对docker很熟悉, 可以跳过这部分
  
@@ -54,18 +56,42 @@
         curl http://localhost:8501/v1/models/mnist
         curl http://localhost:8501/v1/models/mnist-copy
         
- 4. 模型服务日志记录
+ 4. 模型服务版本管理
  
- 5. 模型服务版本管理        
+    1). models.config配置新增模型信息
+    
+        name: 'mnist-copy'
+        base_path: '/models/mnist-copy/',
+        model_platform: 'tensorflow',
+        model_version_policy:{
+            specific: {
+                versions:1,
+                versions:2
+            }
+        } 
+ 
+    2). 如使用mnist-copy第二个模型
+        
+        rest方式：
+        http://localhost:8501/v1/models/mnist-copy/versions/2:predict
+        
+        grpc: 默认取最新版
+        
+
+ 5. 模型服务日志记录
+ 
+     1). 查看容器日志
+        
+        sudo logs containerID          
     
 
 三、 ubuntu deb包方式安装tensorflow serving
 
 四、 如何使用tensorflow serving部署的模型
 
- 1. 通过restful调用, 见client/rest
+ 1. 通过restful调用, 见client/predictor/predict_by_rest
  
- 2. 通过grpc调用, 间client/grpc
+ 2. 通过grpc调用, 间client/predictor/predict_by_grpc
 
 
 五、 本项目中的docker常用命令和解释
@@ -106,7 +132,16 @@
                 }
             ],
     
- 2. todo: 待完善
+ 2. 修改容器名称
+    ```
+    sudo docker rename containerID NEW_NAME
+    ```
+    
+ 3. 查看容器日志
+    ```
+    sudo docker logs [option] containerID/containerName
+    ```
+    
         
         
         

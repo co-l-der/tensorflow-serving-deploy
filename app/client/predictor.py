@@ -8,6 +8,9 @@ import grpc
 import tensorflow as tf
 from tensorflow_serving.apis import prediction_service_pb2_grpc, predict_pb2
 
+from app.tools import processor
+from app.tools.processor import Flag
+
 __author__ = "han"
 
 
@@ -15,25 +18,26 @@ class Prediction(object):
 
     def __init__(self, **kwargs):
         self.model_name = kwargs.get("model_name", None)
-        self.version = kwargs.get("version", "v1")
+        self.version = kwargs.get("version", 1)
         self.channel = kwargs.get("channel", None)
         self.domain = kwargs.get("domain", None)
 
-    def predict_by_rest(self, input_x):
+    def predict_by_rest(self, image):
         """
         功能： 通过restful方式调用tensorflow serving模型服务
-        :param input_x: 模型输入
+        :param image: 模型输入
         :return: 模型输出
         """
+        input_x = processor.img_to_mnist_input(image, serving_type=Flag.REST.value)
         if not self.domain:
             raise Exception("domain can not be none")
         if not self.model_name:
             raise Exception("model_name can not be none")
 
         # domain 如： ”http://localhost:8501“
-        url = "{domain}/{version}/models/{model_name}:predict".format(
+        url = "{domain}/v1/models/{model_name}/versions/{version}:predict".format(
             domain=self.domain,
-            version=self.version,
+            version=str(self.version),
             model_name=self.model_name
         )
 
@@ -48,6 +52,7 @@ class Prediction(object):
 
         result = response.get("predictions", None)
 
+        # 返回原result
         if not result:
             # 抛没有结果异常
             print(response)
@@ -55,12 +60,15 @@ class Prediction(object):
 
         return result
 
-    def predict_by_grpc(self, input_x):
+    def predict_by_grpc(self, image):
         """
         功能: 通过grpc方式调用tensorflow serving模型服务
-        :param input_x: 模型输入
+        :param image: 模型输入
         :return:
         """
+
+        input_x = processor.img_to_mnist_input(image, serving_type=Flag.GRPC.value)
+
         if not self.channel:
             raise Exception("channel can not be none.")
         if not self.model_name:
